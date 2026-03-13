@@ -1,7 +1,6 @@
 import sys
 from math import floor
-from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QPushButton, QLabel, QVBoxLayout, QHBoxLayout, \
-    QMessageBox, QDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QPushButton, QLabel, QVBoxLayout, QHBoxLayout, QMessageBox, QDialog
 from PyQt5.QtCore import Qt, QTimer
 from modules.boardGen import BoardGenerator
 from modules.validation import WordValidator
@@ -17,7 +16,7 @@ class TileButton(QPushButton):
         self.col = col
         self.is_selected = False
         self.is_ai_highlighted = False
-        self.setFixedSize(80, 80)
+        self.setFixedSize(70, 70)
         self.update_style()
 
     def update_style(self):
@@ -241,7 +240,7 @@ class BoggleGame(QWidget):
 
         board_container = QWidget()
         self.board_layout = QGridLayout()
-        self.board_layout.setSpacing(20)
+        self.board_layout.setSpacing(25)
         board_container.setLayout(self.board_layout)
         board_container.setMaximumSize(500, 500)
 

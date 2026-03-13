@@ -19,7 +19,7 @@ class ConfigWindow(QWidget):
         self.helper_index = 0
 
         self.gridsize_options = ["4x4", "5x5"]
-        self.timer_options = ["Off", "3:00", "3:30", "4:00"]
+        self.timer_options = ["3:00", "3:30", "4:00", "Off"]
         self.difficulty_options = ["Medium", "Hard", "Easy"]
         self.helper_options = ["On", "Off"]
 

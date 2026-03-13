@@ -93,7 +93,6 @@ class AIHelper:
     def _search_with_threshold(self, board, found_words, threshold):
         """
         Search for words above given threshold using multi-threaded beam search
-
         Args:
             board (list): 2D list representing the Boggle board
             found_words (set): Set of words already found
@@ -138,8 +137,6 @@ class AIHelper:
 
     def _beam_search(self, board, start_row, start_col, found_words, threshold, found_result):
         """
-        Perform beam search from a starting position
-
         Args:
             board (list): 2D list representing the board
             start_row (int): Starting row
