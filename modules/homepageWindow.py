@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QLabel, QVBoxLayout,
                              QHBoxLayout)
 from PyQt5.QtCore import Qt
+from css.homepagecss import style
 
 '''
 This file serves as the application's main menu and navigation hub.
@@ -43,46 +44,8 @@ class MainMenu(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Boggle')
-        self.setGeometry(300, 300, 800, 600)
-
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #f0f0f0;
-            }
-            QLabel#TitleLabel {
-                font-size: 72px;
-                font-weight: bold;
-                color: #555;
-            }
-            QPushButton {
-                font-size: 24px;
-                color: white;
-                padding: 15px 30px;
-                border-radius: 20px;
-                border: 2px solid #333;
-            }
-            QPushButton#PlayButton {
-                background-color: #4CAF50;
-                font-weight: bold;
-            }
-            QPushButton#PlayButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton#GameHistoryButton {
-                background-color: #ff9800;
-                font-weight: bold;
-            }
-            QPushButton#GameHistoryButton:hover {
-                background-color: #fb8c00;
-            }
-            QPushButton#QuitButton {
-                background-color: #f44336;
-                font-weight: bold;
-            }
-            QPushButton#QuitButton:hover {
-                background-color: #d32f2f;
-            }
-        """)
+        self.setFixedSize(900, 700)
+        self.setStyleSheet(style)
 
         v_layout = QVBoxLayout()
         h_layout = QHBoxLayout()
@@ -131,4 +94,4 @@ class MainMenu(QWidget):
         self.history_window.show()
 
     def quit_game(self):
-        QApplication.instance().quit()
+        sys.exit()

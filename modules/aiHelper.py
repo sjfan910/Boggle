@@ -1,6 +1,6 @@
 import threading
 from wordfreq import word_frequency
-from modules.validation import WordValidator
+from modules.validation import shared_validator
 
 """
 AI Helper Module for Boggle Game
@@ -65,7 +65,7 @@ class BeamSearchNode:
 
 class AIHelper:
     def __init__(self):
-        self.validator = WordValidator()
+        self.validator = shared_validator
         self.beam_width = 2
         self.max_word_length = 5
 

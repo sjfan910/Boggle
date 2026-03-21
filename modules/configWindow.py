@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QPushButton, QLabel, QVBoxLayout, QHBoxLayout
 from PyQt5.QtCore import Qt
+from css.configWindowcss import *
 
 '''
 This file creates the configuration screen where the user customize Boggle game settings.
@@ -11,7 +12,6 @@ It acts as the bridge between the main menu and the actual game, managing all ga
 class ConfigWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.main_menu = None
 
         self.gridsize_index = 0
         self.timer_index = 0
@@ -26,25 +26,19 @@ class ConfigWindow(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle('Boggle - Configuration')
-        self.setGeometry(300, 300, 800, 600)
-        self.setStyleSheet("background-color: #f0f0f0;")
+        self.setWindowTitle('Boggle Configuration')
+        self.setFixedSize(900, 700)
+        self.setStyleSheet("background-color: white;")
         main_layout = QVBoxLayout()
         title = QLabel('Game Configuration')
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("""
-            font-size: 48px;
-            font-weight: bold;
-            color: #333;
-            padding: 20px;
-            margin-bottom: 30px;
-        """)
+        title.setStyleSheet(titleStyle)
         grid_layout = QGridLayout()
         grid_layout.setSpacing(30)
 
         gridsize_label = QLabel('Grid Size')
         gridsize_label.setAlignment(Qt.AlignCenter)
-        gridsize_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #555;")
+        gridsize_label.setStyleSheet(gridStyle)
         self.gridsize_btn = self.create_toggle_button(self.gridsize_options[0])
         self.gridsize_btn.clicked.connect(self.toggle_gridsize)
 
@@ -165,6 +159,7 @@ class ConfigWindow(QWidget):
         }
         from modules.boggleGame import BoggleGame
         self.hide()
+        print(self.main_menu.__dict__)
         self.game_window = BoggleGame(config, self.main_menu)
         self.game_window.config_window = self
         self.game_window.show()

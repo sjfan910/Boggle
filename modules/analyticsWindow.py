@@ -86,7 +86,7 @@ class AnalyticsWindow(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Game Analytics')
-        self.setGeometry(200, 100, 800, 600)
+        self.setFixedSize(900, 700)
         self.setStyleSheet("background-color: #f5f5f5;")
         self.message_label = QLabel("")
         self.message_label.setAlignment(Qt.AlignCenter)

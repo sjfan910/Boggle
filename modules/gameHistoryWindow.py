@@ -174,7 +174,7 @@ class GameHistoryWindow(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Game History')
-        self.setGeometry(200, 100, 900, 700)
+        self.setFixedSize(900, 700)
         self.setStyleSheet("background-color: #f0f0f0;")
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(30, 20, 30, 20)

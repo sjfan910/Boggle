@@ -1,4 +1,4 @@
-from modules.validation import WordValidator
+from modules.validation import shared_validator
 
 '''
 This file discovers all valid words hidden in a Boggle board.
@@ -62,7 +62,7 @@ FUNCTION dfs(board, row, col, current_word, visited, found_words):
 '''
 class WordFinder:
     def __init__(self):
-        self.validator = WordValidator()
+        self.validator = shared_validator
 
     def find_all_words(self, board):
         words = set() # Prevent word duplication

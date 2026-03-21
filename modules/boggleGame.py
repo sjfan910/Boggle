@@ -3,10 +3,11 @@ from math import floor
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QPushButton, QLabel, QVBoxLayout, QHBoxLayout, QMessageBox, QDialog
 from PyQt5.QtCore import Qt, QTimer
 from modules.boardGen import BoardGenerator
-from modules.validation import WordValidator
+from modules.validation import shared_validator
 from modules.wordFinder import WordFinder
 from modules.analyticsWindow import AnalyticsWindow
 from modules.aiHelper import AIHelper
+from css.boggleGamecss import *
 
 
 class TileButton(QPushButton):
@@ -70,16 +71,7 @@ class TileButton(QPushButton):
         self.update_style()
 
     def flash_color(self, color, border_color):
-        self.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {color};
-                color: white;
-                font-size: 36px;
-                font-weight: bold;
-                border: 3px solid {border_color};
-                border-radius: 10px;
-            }}
-        """)
+        self.setStyleSheet(flashStyle.format(color=color, border_color=border_color))
 
 
 class EndGameDialog(QDialog):
@@ -157,13 +149,13 @@ class BoggleGame(QWidget):
         self.is_dragging = False
         self.ai_helper_uses = 0
 
-        self.ai_cooldown_time = 20  # 20 seconds
+        self.ai_cooldown_time = 20
         self.ai_cooldown_remaining = 0
         self.ai_cooldown_timer = None
         self.ai_highlighted_path = []
 
         self.board_gen = BoardGenerator(self.grid_size, self.difficulty)
-        self.validator = WordValidator()
+        self.validator = shared_validator
         self.word_finder = WordFinder()
         self.ai_helper = AIHelper() if self.ai_helper_enabled else None
 

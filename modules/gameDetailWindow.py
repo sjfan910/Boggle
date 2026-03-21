@@ -27,7 +27,7 @@ class GameDetailWindow(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Game Details')
-        self.setGeometry(200, 100, 900, 700)
+        self.setFixedSize(900, 700)
         self.setStyleSheet("background-color: #f0f0f0;")
 
         main_layout = QVBoxLayout()

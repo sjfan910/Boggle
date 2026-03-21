@@ -134,3 +134,6 @@ class WordValidator:
 
     def is_valid_prefix(self, prefix):
         return self.trie.starts_with(prefix)
+
+# Shared singleton — dictionary loaded once and reused by all modules
+shared_validator = WordValidator()
