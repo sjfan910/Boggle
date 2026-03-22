@@ -22,45 +22,14 @@ class TileButton(QPushButton):
 
     def update_style(self):
         if self.is_ai_highlighted:
-            # AI Helper highlighting (purple/blue)
-            self.setStyleSheet("""
-                QPushButton {
-                    background-color: #9C27B0;
-                    color: white;
-                    font-size: 36px;
-                    font-weight: bold;
-                    border: 3px solid #7B1FA2;
-                    border-radius: 10px;
-                }
-            """)
+            # AI Helper highlighting
+            self.setStyleSheet(aiStyle)
         elif self.is_selected:
-            # User selection (green)
-            self.setStyleSheet("""
-                QPushButton {
-                    background-color: #4CAF50;
-                    color: white;
-                    font-size: 36px;
-                    font-weight: bold;
-                    border: 3px solid #2E7D32;
-                    border-radius: 10px;
-                }
-            """)
+            # User selection
+            self.setStyleSheet(playerStyle)
         else:
             # Default state
-            self.setStyleSheet("""
-                QPushButton {
-                    background-color: white;
-                    color: #333;
-                    font-size: 36px;
-                    font-weight: bold;
-                    border: 2px solid #666;
-                    border-radius: 10px;
-                }
-                QPushButton:hover {
-                    background-color: #E8F5E9;
-                    border: 3px solid #4CAF50;
-                }
-            """)
+            self.setStyleSheet(defaultStyle)
 
     def set_selected(self, selected):
         self.is_selected = selected
@@ -87,37 +56,11 @@ class EndGameDialog(QDialog):
         button_layout = QHBoxLayout()
 
         no_btn = QPushButton("No, Return")
-        no_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #607D8B;
-                color: white;
-                padding: 10px;
-                font-size: 14px;
-                font-weight: bold;
-                border-radius: 10px;
-                border: 2px solid #333;
-            }
-            QPushButton:hover {
-                background-color: #455A64;
-            }
-        """)
+        no_btn.setStyleSheet(returnConfirm)
         no_btn.clicked.connect(self.reject)
 
         yes_btn = QPushButton("Yes, End and Exit")
-        yes_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #f44336;
-                color: white;
-                padding: 10px;
-                font-size: 14px;
-                font-weight: bold;
-                border-radius: 10px;
-                border: 2px solid #333;
-            }
-            QPushButton:hover {
-                background-color: #d32f2f;
-            }
-        """)
+        yes_btn.setStyleSheet(endgameConfirm)
         yes_btn.clicked.connect(self.accept)
 
         button_layout.addWidget(no_btn)
@@ -173,35 +116,16 @@ class BoggleGame(QWidget):
     def initUI(self):
         self.setWindowTitle('Boggle Game')
         self.setGeometry(200, 100, 900, 750)
-        self.setStyleSheet("background-color: #f5f5f5;")
+        self.setStyleSheet("background-color: white;")
         main_layout = QVBoxLayout()
         top_bar = QHBoxLayout()
 
         self.timer_label = QLabel('Time: --:--')
-        self.timer_label.setStyleSheet("""
-            font-size: 28px;
-            font-weight: bold;
-            color: #333;
-            padding: 10px;
-            background-color: white;
-            border-radius: 10px;
-        """)
+        self.timer_label.setStyleSheet(timerLabel)
 
         end_game_btn = QPushButton('End Game')
         end_game_btn.setFixedSize(120, 40)
-        end_game_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #f44336;
-                color: white;
-                font-size: 14px;
-                font-weight: bold;
-                border-radius: 10px;
-                border: 2px solid #333;
-            }
-            QPushButton:hover {
-                background-color: #d32f2f;
-            }
-        """)
+        end_game_btn.setStyleSheet(endbuttonStyle)
         end_game_btn.clicked.connect(self.confirm_end_game)
 
         top_bar.addWidget(self.timer_label)
@@ -210,25 +134,11 @@ class BoggleGame(QWidget):
 
         self.score_label = QLabel('Score: 0')
         self.score_label.setAlignment(Qt.AlignCenter)
-        self.score_label.setStyleSheet("""
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            padding: 10px;
-        """)
+        self.score_label.setStyleSheet(scoreStyle)
 
         self.word_display = QLabel('')
         self.word_display.setAlignment(Qt.AlignCenter)
-        self.word_display.setStyleSheet("""
-            font-size: 36px;
-            font-weight: bold;
-            color: #4CAF50;
-            padding: 15px;
-            background-color: white;
-            border: 3px solid #4CAF50;
-            border-radius: 10px;
-            min-height: 60px;
-        """)
+        self.word_display.setStyleSheet(wordStyle)
 
         board_container = QWidget()
         self.board_layout = QGridLayout()
@@ -239,14 +149,7 @@ class BoggleGame(QWidget):
         self.words_label = QLabel('Found Words:')
         self.words_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #333;")
         self.words_display = QLabel('')
-        self.words_display.setStyleSheet("""
-            background-color: white;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 14px;
-            color: #333;
-        """)
+        self.words_display.setStyleSheet(foundwordsStyle)
         self.words_display.setWordWrap(True)
         self.words_display.setMaximumHeight(100)
 
@@ -256,24 +159,7 @@ class BoggleGame(QWidget):
 
             self.ai_helper_btn = QPushButton('AI Helper')
             self.ai_helper_btn.setFixedSize(180, 50)
-            self.ai_helper_btn.setStyleSheet("""
-                QPushButton {
-                    background-color: #9C27B0;
-                    color: white;
-                    font-size: 18px;
-                    font-weight: bold;
-                    border-radius: 10px;
-                    border: 2px solid #7B1FA2;
-                }
-                QPushButton:hover {
-                    background-color: #7B1FA2;
-                }
-                QPushButton:disabled {
-                    background-color: #BDBDBD;
-                    color: #757575;
-                    border: 2px solid #9E9E9E;
-                }
-            """)
+            self.ai_helper_btn.setStyleSheet(aibuttonStyle)
             self.ai_helper_btn.clicked.connect(self.use_ai_helper)
 
             self.ai_cooldown_label = QLabel('')
@@ -341,16 +227,7 @@ class BoggleGame(QWidget):
             self.ai_helper_btn.setEnabled(True)
             return
         self.word_display.setText(f"AI suggests: {word}")
-        self.word_display.setStyleSheet("""
-            font-size: 32px;
-            font-weight: bold;
-            color: #9C27B0;
-            padding: 15px;
-            background-color: white;
-            border: 3px solid #9C27B0;
-            border-radius: 10px;
-            min-height: 60px;
-        """)
+        self.word_display.setStyleSheet(aiFonting)
         self.animate_ai_path(path)
         self.start_ai_cooldown()
 
@@ -371,16 +248,7 @@ class BoggleGame(QWidget):
         self.ai_highlighted_path = []
         if "AI suggests:" in self.word_display.text():
             self.word_display.setText("")
-            self.word_display.setStyleSheet("""
-                font-size: 36px;
-                font-weight: bold;
-                color: #4CAF50;
-                padding: 15px;
-                background-color: white;
-                border: 3px solid #4CAF50;
-                border-radius: 10px;
-                min-height: 60px;
-            """)
+            self.word_display.setStyleSheet(defaultFonting)
 
     def start_ai_cooldown(self):
         self.ai_cooldown_remaining = self.ai_cooldown_time
