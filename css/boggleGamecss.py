@@ -166,3 +166,46 @@ defaultFonting = """
                 min-height: 60px;
             """
 
+alreadyFound = """
+                font-size: 36px;
+                font-weight: bold;
+                color: orange;
+                padding: 15px;
+                background-color: white;
+                border: 3px solid orange;
+                border-radius: 10px;
+                min-height: 60px;
+            """
+
+validWord = """
+                font-size: 36px;
+                font-weight: bold;
+                color: green;
+                padding: 15px;
+                background-color: white;
+                border: 3px solid green;
+                border-radius: 10px;
+                min-height: 60px;
+            """
+
+invalidWord = """
+                font-size: 36px;
+                font-weight: bold;
+                color: red;
+                padding: 15px;
+                background-color: white;
+                border: 3px solid red;
+                border-radius: 10px;
+                min-height: 60px;
+            """
+
+aiSuggest = """
+                font-size: 36px;
+                font-weight: bold;
+                color: #4CAF50;
+                padding: 15px;
+                background-color: white;
+                border: 3px solid #4CAF50;
+                border-radius: 10px;
+                min-height: 60px;
+            """
