@@ -1,10 +1,12 @@
 import sys
 import json
 import os
+import sqlite3
 from PyQt5.QtWidgets import (QWidget, QLabel, QVBoxLayout, QHBoxLayout,
                              QPushButton, QScrollArea, QFrame, QMessageBox)
 from PyQt5.QtCore import Qt
 from modules.gameDetailWindow import format_timestamp
+from css.gameHistoryWindowcss import *
 
 """
 GameHistoryWindow displays a scrollable list of all previously played games.
@@ -23,6 +25,13 @@ Key Features:
 class GameBlock(QFrame):
     def __init__(self, game_data, index, parent_window):
         super().__init__()
+        self.con = sqlite3.connect("data/game_history.db")
+        self.cur = self.con.cursor()
+        sql = f"SELECT * FROM gameHistory WHERE rowID = {index+1}"
+        print(sql)
+        res = self.cur.execute(sql)
+        self.game_info = res.fetchone()
+        print(self.game_info)
         self.game_data = game_data
         self.index = index
         self.parent_window = parent_window
@@ -33,18 +42,7 @@ class GameBlock(QFrame):
 
     def __initUI(self):
         self.setFixedHeight(100)
-        self.setStyleSheet("""
-            GameBlock {
-                background-color: white;
-                border: 2px solid #ddd;
-                border-radius: 15px;
-                padding: 10px;
-            }
-            GameBlock:hover {
-                border: 2px solid #4CAF50;
-                background-color: #f9f9f9;
-            }
-        """)
+        self.setStyleSheet(gameBlockStyle)
 
         main_layout = QHBoxLayout()
         main_layout.setContentsMargins(15, 15, 15, 15)
@@ -56,15 +54,7 @@ class GameBlock(QFrame):
         completion_badge = QLabel(f"{completion:.1f}%")
         completion_badge.setFixedSize(80, 60)
         completion_badge.setAlignment(Qt.AlignCenter)
-        completion_badge.setStyleSheet("""
-            QLabel {
-                background-color: #2196F3;
-                color: white;
-                font-size: 18px;
-                font-weight: bold;
-                border-radius: 10px;
-            }
-        """)
+        completion_badge.setStyleSheet(completionBadgeStyle)
 
         info_layout = QVBoxLayout()
         info_layout.setSpacing(5)
@@ -73,10 +63,7 @@ class GameBlock(QFrame):
         formatted_time = format_timestamp(timestamp_str)
 
         timestamp_label = QLabel(formatted_time)
-        timestamp_label.setStyleSheet("""
-            font-size: 14px;
-            color: #666;
-        """)
+        timestamp_label.setStyleSheet(timestampLabelStyle)
 
         grid_size = self.game_data.get('grid_size', 4)
         difficulty = self.game_data.get('difficulty', 'Unknown')
@@ -91,30 +78,15 @@ class GameBlock(QFrame):
 
         settings_text = f"{grid_size}x{grid_size} Grid, {difficulty} mode, {timer}"
         settings_label = QLabel(settings_text)
-        settings_label.setStyleSheet("""
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        """)
+        settings_label.setStyleSheet(settingsLabelStyle)
 
         info_layout.addWidget(timestamp_label)
         info_layout.addWidget(settings_label)
         info_layout.addStretch()
 
-        delete_btn = QPushButton('🗑️')
+        delete_btn = QPushButton('Delete Game')
         delete_btn.setFixedSize(40, 40)
-        delete_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #f44336;
-                color: white;
-                font-size: 20px;
-                border-radius: 20px;
-                border: 2px solid #d32f2f;
-            }
-            QPushButton:hover {
-                background-color: #d32f2f;
-            }
-        """)
+        delete_btn.setStyleSheet(deleteButtonStyle)
         delete_btn.clicked.connect(self.delete_game)
 
         main_layout.addWidget(completion_badge)
@@ -151,7 +123,6 @@ class GameHistoryWindow(QWidget):
                 self.game_history = json.load(f)
                 self.game_history.reverse()
         except Exception as e:
-            QMessageBox.warning(self, "Error loading history: {e}")
             self.game_history = []
 
     def __initUI(self):
@@ -163,39 +134,18 @@ class GameHistoryWindow(QWidget):
         header_layout = QHBoxLayout()
 
         title = QLabel('Game History')
-        title.setStyleSheet("""
-            font-size: 48px;
-            font-weight: bold;
-            color: #333;
-        """)
+        title.setStyleSheet(titleStyle)
 
         back_btn = QPushButton('Back')
         back_btn.setFixedSize(120, 40)
-        back_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #607D8B;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 10px;
-                border: 2px solid #455A64;
-            }
-            QPushButton:hover {
-                background-color: #455A64;
-            }
-        """)
+        back_btn.setStyleSheet(backButtonStyle)
         back_btn.clicked.connect(self.back_to_menu)
         header_layout.addWidget(title)
         header_layout.addStretch()
         header_layout.addWidget(back_btn)
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("""
-            QScrollArea {
-                border: none;
-                background-color: transparent;
-            }
-        """)
+        scroll.setStyleSheet(scrollAreaStyle)
 
         scroll_content = QWidget()
         self.games_layout = QVBoxLayout()
@@ -204,11 +154,7 @@ class GameHistoryWindow(QWidget):
         if len(self.game_history) == 0:
             empty_label = QLabel('No games played yet.\nStart playing to build your history')
             empty_label.setAlignment(Qt.AlignCenter)
-            empty_label.setStyleSheet("""
-                font-size: 24px;
-                color: #999;
-                padding: 100px;
-            """)
+            empty_label.setStyleSheet(emptyLabelStyle)
             self.games_layout.addWidget(empty_label)
         else:
             for i, game_data in enumerate(self.game_history):
@@ -224,6 +170,12 @@ class GameHistoryWindow(QWidget):
 
     def delete_game_at_index(self, index):
         actual_index = len(self.game_history) - 1 - index
+
+        con = sqlite3.connect("data/game_history.db")
+        cur = con.cursor() 
+        cur.execute(f"""DELETE FROM gameHistory WHERE rowID = {actual_index}""")
+        con.commit()
+
         try:
             with open(self.history_file, 'r') as f:
                 original_history = json.load(f)
@@ -244,11 +196,7 @@ class GameHistoryWindow(QWidget):
         if len(self.game_history) == 0:
             empty_label = QLabel('No games played yet.\nStart playing to build your history')
             empty_label.setAlignment(Qt.AlignCenter)
-            empty_label.setStyleSheet("""
-                font-size: 24px;
-                color: #999;
-                padding: 100px;
-            """)
+            empty_label.setStyleSheet(emptyLabelStyle)
             self.games_layout.addWidget(empty_label)
         else:
             for i, game_data in enumerate(self.game_history):

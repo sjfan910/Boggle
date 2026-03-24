@@ -62,7 +62,7 @@ Key Methods:
 
 class _TrieNode:
     def __init__(self):
-        self.children = {}
+        self.children = {} # Implement Nodes as HashMap
         self.is_word = False
 
 class _Trie:

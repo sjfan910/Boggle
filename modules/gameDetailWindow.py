@@ -3,6 +3,7 @@ from datetime import datetime
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout,
                              QPushButton, QScrollArea, QFrame)
 from PyQt5.QtCore import Qt
+from css.gameDetailWindowcss import *
 
 """
 GameDetailWindow displays detailed breakdown of a single game.
@@ -60,11 +61,7 @@ class GameDetailWindow(QWidget):
         completion = (found / total * 100) if total > 0 else 0
 
         completion_label = QLabel(f'Completion: <span style="color: #FF9800;">{completion:.1f}%</span>')
-        completion_label.setStyleSheet("""
-            font-size: 42px;
-            font-weight: bold;
-            color: #333;
-        """)
+        completion_label.setStyleSheet(completionLabelStyle)
 
         timestamp_str = self.game_data.get('timestamp', '')
         formatted_time = self.__format_timestamp(timestamp_str)
@@ -81,27 +78,12 @@ class GameDetailWindow(QWidget):
 
         info_text = f"{formatted_time} • {grid_size}x{grid_size} Grid, {difficulty} mode, {timer}"
         info_label = QLabel(info_text)
-        info_label.setStyleSheet("""
-            font-size: 16px;
-            color: #666;
-        """)
+        info_label.setStyleSheet(infoLabelStyle)
 
         top_bar = QHBoxLayout()
         back_btn = QPushButton('Back')
         back_btn.setFixedSize(120, 40)
-        back_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #607D8B;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 10px;
-                border: 2px solid #455A64;
-            }
-            QPushButton:hover {
-                background-color: #455A64;
-            }
-        """)
+        back_btn.setStyleSheet(backButtonStyle)
         back_btn.clicked.connect(self.back_to_history)
 
         top_bar.addStretch()
@@ -118,12 +100,7 @@ class GameDetailWindow(QWidget):
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("""
-            QScrollArea {
-                border: none;
-                background-color: transparent;
-            }
-        """)
+        scroll.setStyleSheet(scrollAreaStyle)
 
         scroll_content = QWidget()
         words_layout = QVBoxLayout()
@@ -190,21 +167,11 @@ class GameDetailWindow(QWidget):
 
         length_str = f"{length}" if isinstance(length, int) else length
         header = QLabel(f'{length_str} Letter Words <span style="color: #4CAF50;">{completion:.1f}%</span>')
-        header.setStyleSheet("""
-            font-size: 22px;
-            font-weight: bold;
-            color: #555;
-        """)
+        header.setStyleSheet(groupHeaderStyle)
         layout.addWidget(header)
 
         words_container = QWidget()
-        words_container.setStyleSheet("""
-            QWidget {
-                background-color: white;
-                border-radius: 10px;
-                padding: 15px;
-            }
-        """)
+        words_container.setStyleSheet(wordsContainerStyle)
 
         words_layout = QVBoxLayout()
         words_layout.setSpacing(5)
@@ -212,21 +179,12 @@ class GameDetailWindow(QWidget):
 
         for word in words_dict['found']:
             word_label = QLabel(word.lower())
-            word_label.setStyleSheet("""
-                font-size: 16px;
-                color: #4CAF50;
-                font-weight: bold;
-                padding: 5px 10px;
-            """)
+            word_label.setStyleSheet(foundWordStyle)
             all_words.append(word_label)
 
         for word in words_dict['missed']:
             word_label = QLabel(word.lower())
-            word_label.setStyleSheet("""
-                font-size: 16px;
-                color: #f44336;
-                padding: 5px 10px;
-            """)
+            word_label.setStyleSheet(missedWordStyle)
             all_words.append(word_label)
         row_layout = QHBoxLayout()
         row_layout.setSpacing(10)

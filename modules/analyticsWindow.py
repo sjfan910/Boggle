@@ -1,8 +1,10 @@
 import sys
 import json
+import sqlite3
 from datetime import datetime
 from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QVBoxLayout, QDialog, QHBoxLayout, QPushButton, QScrollArea, QMessageBox)
 from PyQt5.QtCore import Qt, QTimer
+from css.analyticsWindowcss import *
 
 
 class DeleteGameDialog(QDialog):
@@ -15,48 +17,17 @@ class DeleteGameDialog(QDialog):
         layout.setSpacing(20)
         question = QLabel("Are you sure you want to delete this game?\nThis action cannot be undone.")
         question.setAlignment(Qt.AlignCenter)
-        question.setStyleSheet("""
-            font-size: 16px; 
-            color: #333; 
-            padding: 20px;
-            line-height: 1.5;
-        """)
+        question.setStyleSheet(dialogQuestionStyle)
 
         cancel_btn = QPushButton("Cancel")
         cancel_btn.setFixedSize(150, 40)
-        cancel_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #607D8B;
-                color: white;
-                padding: 10px;
-                font-size: 14px;
-                font-weight: bold;
-                border-radius: 10px;
-                border: 2px solid #333;
-            }
-            QPushButton:hover {
-                background-color: #455A64;
-            }
-        """)
+        cancel_btn.setStyleSheet(dialogCancelStyle)
         cancel_btn.clicked.connect(self.reject)
         cancel_btn.setDefault(True)
 
         delete_btn = QPushButton("Delete Game")
         delete_btn.setFixedSize(150, 40)
-        delete_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #f44336;
-                color: white;
-                padding: 10px;
-                font-size: 14px;
-                font-weight: bold;
-                border-radius: 10px;
-                border: 2px solid #333;
-            }
-            QPushButton:hover {
-                background-color: #d32f2f;
-            }
-        """)
+        delete_btn.setStyleSheet(dialogDeleteStyle)
         delete_btn.clicked.connect(self.accept)
 
         button_layout = QHBoxLayout()
@@ -84,6 +55,38 @@ class AnalyticsWindow(QWidget):
 
         self.__initUI()
 
+    def merge_sort(self, missed_words): 
+        # Recursive In Place Merge Sort of Time complexity O(nlog(n))
+        n = len(missed_words) 
+        if n > 1:
+            m = n // 2 # divide the list in two sub lists
+            l1 = missed_words[:m]
+            l2 = missed_words[m:]
+
+            self.merge_sort(l1)
+            self.merge_sort(l2)
+
+            i = j = k = 0
+
+            while i < len(l1) and j < len(l2):
+                if l1[i] <= l2[j]:
+                    missed_words[k] = l1[i]
+                    i += 1
+                else:
+                    missed_words[k] = l2[j]
+                    j += 1
+                k = k + 1
+
+            while i < len(l1):
+                missed_words[k] = l1[i]
+                i += 1
+                k += 1    
+            while j < len(l2):
+                missed_words[k] = l2[j]
+                j += 1
+                k += 1
+
+
     def __initUI(self):
         self.setWindowTitle('Game Analytics')
         self.setFixedSize(900, 700)
@@ -95,40 +98,21 @@ class AnalyticsWindow(QWidget):
 
         title = QLabel('Post-Game Analytics')
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("""
-            font-size: 32px;
-            font-weight: bold;
-            color: #333;
-            padding: 20px;
-        """)
+        title.setStyleSheet(titleStyle)
 
         score_text = f"Final Score: {self.game_data['score']}"
         score_label = QLabel(score_text)
         score_label.setAlignment(Qt.AlignCenter)
-        score_label.setStyleSheet("font-size: 24px; font-weight: bold; color: #333; padding: 10px;")
+        score_label.setStyleSheet(scoreStyle)
 
         stats_layout = QHBoxLayout()
         found_stat = QLabel(f"Words Found:\n{len(self.game_data['found_words'])}")
         found_stat.setAlignment(Qt.AlignCenter)
-        found_stat.setStyleSheet("""
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #4CAF50;
-        """)
+        found_stat.setStyleSheet(foundStatStyle)
 
         missed_stat = QLabel(f"Words Missed:\n{len(self.missed_words)}")
         missed_stat.setAlignment(Qt.AlignCenter)
-        missed_stat.setStyleSheet("""
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #f44336;
-        """)
+        missed_stat.setStyleSheet(missedStatStyle)
         if self.game_data['all_possible_words']:
             percentage = (len(self.game_data['found_words']) /
                         len(self.game_data['all_possible_words']) * 100)
@@ -137,40 +121,23 @@ class AnalyticsWindow(QWidget):
 
         percent_stat = QLabel(f"Completion:\n{percentage:.1f}%")
         percent_stat.setAlignment(Qt.AlignCenter)
-        percent_stat.setStyleSheet("""
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #2196F3;
-        """)
+        percent_stat.setStyleSheet(percentStatStyle)
 
         stats_layout.addWidget(found_stat)
         stats_layout.addWidget(missed_stat)
         stats_layout.addWidget(percent_stat)
 
         missed_label = QLabel('Missed Words:')
-        missed_label.setStyleSheet("""
-            font-size: 18px; 
-            font-weight: bold; 
-            color: #333; 
-            margin-top: 20px;
-        """)
+        missed_label.setStyleSheet(missedLabelStyle)
 
         if self.missed_words:
-            missed_text = ', '.join(sorted(self.missed_words))
+            self.merge_sort(self.missed_words)
+            missed_text = ', '.join(self.missed_words)
         else:
             missed_text = ''
         missed_display = QLabel(missed_text)
         missed_display.setWordWrap(True)
-        missed_display.setStyleSheet("""
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 14px;
-            color: #333;
-        """)
+        missed_display.setStyleSheet(missedDisplayStyle)
 
         scroll_area = QScrollArea()
         scroll_content = QWidget()
@@ -184,36 +151,12 @@ class AnalyticsWindow(QWidget):
         button_layout = QHBoxLayout()
         save_btn = QPushButton('Save This Game')
         save_btn.setFixedSize(200, 50)
-        save_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-                border: 2px solid #333;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-        """)
+        save_btn.setStyleSheet(saveButtonStyle)
         save_btn.clicked.connect(self.save_game)
 
         delete_btn = QPushButton('Delete This Game')
         delete_btn.setFixedSize(200, 50)
-        delete_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #f44336;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                border-radius: 25px;
-                border: 2px solid #333;
-            }
-            QPushButton:hover {
-                background-color: #d32f2f;
-            }
-        """)
+        delete_btn.setStyleSheet(deleteButtonStyle)
         delete_btn.clicked.connect(self.delete_game)
 
         button_layout.addWidget(save_btn)
@@ -232,36 +175,14 @@ class AnalyticsWindow(QWidget):
     def __show_success_message(self, text):
         self.setEnabled(False)
         self.message_label.setText(text)
-        self.message_label.setStyleSheet("""
-            QLabel {
-                background-color: #d4edda;
-                color: #155724;
-                border: 2px solid #c3e6cb;
-                border-radius: 8px;
-                padding: 15px;
-                font-size: 16px;
-                font-weight: bold;
-                margin: 10px;
-            }
-        """)
+        self.message_label.setStyleSheet(successMessageStyle)
         self.message_label.show()
         QTimer.singleShot(1000, lambda: (self.message_label.hide(), self.setEnabled(True)))
 
     def __show_error_message(self, text):
         self.setEnabled(False)
         self.message_label.setText(text)
-        self.message_label.setStyleSheet("""
-            QLabel {
-                background-color: #f8d7da;
-                color: #721c24;
-                border: 2px solid #f5c6cb;
-                border-radius: 8px;
-                padding: 15px;
-                font-size: 16px;
-                font-weight: bold;
-                margin: 10px;
-            }
-        """)
+        self.message_label.setStyleSheet(errorMessageStyle)
         self.message_label.show()
         QTimer.singleShot(1000, lambda: (self.message_label.hide(), self.setEnabled(True)))
 
@@ -272,6 +193,18 @@ class AnalyticsWindow(QWidget):
     def save_game(self):
         try:
             self.game_data['timestamp'] = datetime.now().isoformat()
+
+            con = sqlite3.connect('data/game_history.db')
+
+            cur = con.cursor()
+            cur.execute("CREATE TABLE if not exists gameHistory(score, grid_size, time_played, ai_helper_uses, difficulty, timer, timestamp)")
+
+            sql = f"""
+                        INSERT INTO gameHistory VALUES ({self.game_data['score']}, {self.game_data['grid_size']}, {self.game_data['time_played']}, {self.game_data['ai_helper_uses']}, "{self.game_data['difficulty']}", {self.game_data['timer']}, "{self.game_data['timestamp']}")"""
+
+            cur.execute(sql)
+            con.commit()
+
             try:
                 with open('data/game_history.json', 'r') as f:
                     games = json.load(f)

@@ -69,35 +69,12 @@ class ConfigWindow(QWidget):
 
         start_btn = QPushButton('Start Game')
         start_btn.setFixedSize(200, 50)
-        start_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                font-size: 20px;
-                font-weight: bold;
-                border-radius: 25px;
-                border: 2px solid #333;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-        """)
+        start_btn.setStyleSheet(startButtonStyle)
         start_btn.clicked.connect(self.start_game)
 
         back_btn = QPushButton('Back to Menu')
         back_btn.setFixedSize(200, 40)
-        back_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #607D8B;
-                color: white;
-                font-size: 16px;
-                border-radius: 20px;
-                border: 2px solid #333;
-            }
-            QPushButton:hover {
-                background-color: #455A64;
-            }
-        """)
+        back_btn.setStyleSheet(backButtonStyle)
         back_btn.clicked.connect(self.back_to_menu)
 
         button_container = QVBoxLayout()
@@ -117,19 +94,7 @@ class ConfigWindow(QWidget):
     def __create_toggle_button(self, text):
         button = QPushButton(text)
         button.setFixedSize(150, 80)
-        button.setStyleSheet("""
-            QPushButton {
-                background-color: #2196F3;
-                color: white;
-                font-size: 24px;
-                font-weight: bold;
-                border-radius: 15px;
-                border: 2px solid #333;
-            }
-            QPushButton:hover {
-                background-color: #1976D2;
-            }
-        """)
+        button.setStyleSheet(toggleButtonStyle)
         return button
 
     def __toggle_gridsize(self):
