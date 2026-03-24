@@ -1,10 +1,10 @@
 import sys
 import json
 import os
-from datetime import datetime
-from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout,
+from PyQt5.QtWidgets import (QWidget, QLabel, QVBoxLayout, QHBoxLayout,
                              QPushButton, QScrollArea, QFrame, QMessageBox)
-from PyQt5.QtCore import Qt, QtWarningMsg
+from PyQt5.QtCore import Qt
+from modules.gameDetailWindow import format_timestamp
 
 """
 GameHistoryWindow displays a scrollable list of all previously played games.
@@ -29,9 +29,9 @@ class GameBlock(QFrame):
         self.setFrameStyle(QFrame.Box | QFrame.Raised)
         self.setLineWidth(2)
         self.setCursor(Qt.PointingHandCursor)
-        self.initUI()
+        self.__initUI()
 
-    def initUI(self):
+    def __initUI(self):
         self.setFixedHeight(100)
         self.setStyleSheet("""
             GameBlock {
@@ -70,7 +70,7 @@ class GameBlock(QFrame):
         info_layout.setSpacing(5)
 
         timestamp_str = self.game_data.get('timestamp', '')
-        formatted_time = self.format_timestamp(timestamp_str)
+        formatted_time = format_timestamp(timestamp_str)
 
         timestamp_label = QLabel(formatted_time)
         timestamp_label.setStyleSheet("""
@@ -124,24 +124,6 @@ class GameBlock(QFrame):
 
         self.setLayout(main_layout)
 
-    def format_timestamp(self, timestamp_str):
-        try:
-            dt = datetime.fromisoformat(timestamp_str)
-            day_name = dt.strftime('%A')
-            day = dt.day
-            month_name = dt.strftime('%B')
-            time = dt.strftime('%H:%M')
-
-            # Add ordinal suffix (st, nd, rd, th)
-            if 10 <= day % 100 <= 20:
-                suffix = 'th'
-            else:
-                suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
-
-            return f"{day_name} {day}{suffix} {month_name} {time}"
-        except:
-            return "Unknown date"
-
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.parent_window.open_game_detail(self.game_data, self.index)
@@ -156,10 +138,10 @@ class GameHistoryWindow(QWidget):
         self.main_menu = main_menu
         self.game_history = []
         self.history_file = 'data/game_history.json'
-        self.load_history()
-        self.initUI()
+        self.__load_history()
+        self.__initUI()
 
-    def load_history(self):
+    def __load_history(self):
         if not os.path.exists(self.history_file):
             self.game_history = []
             return
@@ -172,7 +154,7 @@ class GameHistoryWindow(QWidget):
             QMessageBox.warning(self, "Error loading history: {e}")
             self.game_history = []
 
-    def initUI(self):
+    def __initUI(self):
         self.setWindowTitle('Game History')
         self.setFixedSize(900, 700)
         self.setStyleSheet("background-color: #f0f0f0;")
@@ -220,7 +202,7 @@ class GameHistoryWindow(QWidget):
         self.games_layout.setSpacing(15)
 
         if len(self.game_history) == 0:
-            empty_label = QLabel('No games played yet.\nStart playing to build your history!')
+            empty_label = QLabel('No games played yet.\nStart playing to build your history')
             empty_label.setAlignment(Qt.AlignCenter)
             empty_label.setStyleSheet("""
                 font-size: 24px;
@@ -248,19 +230,19 @@ class GameHistoryWindow(QWidget):
             del original_history[actual_index]
             with open(self.history_file, 'w') as f:
                 json.dump(original_history, f, indent=2)
-            self.load_history()
-            self.refresh_display()
+            self.__load_history()
+            self.__refresh_display()
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Failed to delete game: {e}")
 
-    def refresh_display(self):
+    def __refresh_display(self):
         while self.games_layout.count():
             child = self.games_layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
 
         if len(self.game_history) == 0:
-            empty_label = QLabel('No games played yet.\nStart playing to build your history!')
+            empty_label = QLabel('No games played yet.\nStart playing to build your history')
             empty_label.setAlignment(Qt.AlignCenter)
             empty_label.setStyleSheet("""
                 font-size: 24px;

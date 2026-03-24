@@ -82,9 +82,9 @@ class AnalyticsWindow(QWidget):
             if word not in game_data['found_words']:
                 self.missed_words.append(word)
 
-        self.initUI()
+        self.__initUI()
 
-    def initUI(self):
+    def __initUI(self):
         self.setWindowTitle('Game Analytics')
         self.setFixedSize(900, 700)
         self.setStyleSheet("background-color: #f5f5f5;")
@@ -229,7 +229,7 @@ class AnalyticsWindow(QWidget):
         main_layout.setContentsMargins(30, 30, 30, 30)
         self.setLayout(main_layout)
 
-    def show_success_message(self, text):
+    def __show_success_message(self, text):
         self.setEnabled(False)
         self.message_label.setText(text)
         self.message_label.setStyleSheet("""
@@ -247,7 +247,7 @@ class AnalyticsWindow(QWidget):
         self.message_label.show()
         QTimer.singleShot(1000, lambda: (self.message_label.hide(), self.setEnabled(True)))
 
-    def show_error_message(self, text):
+    def __show_error_message(self, text):
         self.setEnabled(False)
         self.message_label.setText(text)
         self.message_label.setStyleSheet("""
@@ -265,7 +265,7 @@ class AnalyticsWindow(QWidget):
         self.message_label.show()
         QTimer.singleShot(1000, lambda: (self.message_label.hide(), self.setEnabled(True)))
 
-    def hide_message(self):
+    def __hide_message(self):
         self.message_label.hide()
         self.setEnabled(True)
 
@@ -282,16 +282,16 @@ class AnalyticsWindow(QWidget):
             with open('data/game_history.json', 'w') as f:
                 json.dump(games, f, indent=2)
 
-            self.show_success_message("Game saved successfully!")
+            self.__show_success_message("Game saved successfully!")
             QTimer.singleShot(1000, self.return_to_menu)
 
-        except Exception:
-            self.show_error_message(f"Failed to save game: {str(Exception)}")
+        except Exception as e:
+            self.__show_error_message(f"Failed to save game: {str(e)}")
 
     def delete_game(self):
         dialog = DeleteGameDialog(self)
         if dialog.exec_() == QDialog.Accepted:
-            self.show_success_message("Game deleted!")
+            self.__show_success_message("Game deleted!")
             QTimer.singleShot(1000, self.return_to_menu)
 
     def return_to_menu(self):

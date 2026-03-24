@@ -199,13 +199,3 @@ invalidWord = """
                 min-height: 60px;
             """
 
-aiSuggest = """
-                font-size: 36px;
-                font-weight: bold;
-                color: #4CAF50;
-                padding: 15px;
-                background-color: white;
-                border: 3px solid #4CAF50;
-                border-radius: 10px;
-                min-height: 60px;
-            """

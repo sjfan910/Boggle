@@ -1,7 +1,7 @@
 import random
 from modules.wordFinder import WordFinder
 
-'''
+"""
 This file generates a Boggle board using real dice configurations. 
 We use wordFinder to validate if there are enough words in the board generated matching the difficulty
 
@@ -63,8 +63,7 @@ Key Methods:
     - WordFinder.find_all_words() 
     - meets_difficulty() 
     - Return if suitable
-    
- '''
+"""
 class BoardGenerator:
     """Generates Boggle boards based on Boggle Dice"""
 
@@ -95,22 +94,22 @@ class BoardGenerator:
 
         for attempt in range(max_attempts):
             if self.size == 4:
-                board = self.generate_from_dice(self.CLASSIC_DICE)
+                board = self.__generate_from_dice(self.CLASSIC_DICE)
             elif self.size == 5:
-                board = self.generate_from_dice(self.BIG_DICE)
+                board = self.__generate_from_dice(self.BIG_DICE)
 
             else: # Generate from random function (This was used for testing)
-                board = self.generate_random()
+                board = self.__generate_random()
 
             word_count = len(self.word_finder.find_all_words(board))
-            if self.meets_difficulty(word_count):
+            if self.__meets_difficulty(word_count):
                 print(f"Board generated with {word_count} words (Difficulty: {self.difficulty})")
                 return board
 
         print(f"Warning: Could not generate board meeting {self.difficulty} difficulty")
         return board
 
-    def generate_from_dice(self, dice):
+    def __generate_from_dice(self, dice):
         """Generate board using Boggle dice"""
         shuffled_dice = dice.copy()
         random.shuffle(shuffled_dice)
@@ -128,7 +127,7 @@ class BoardGenerator:
             board.append(board_row)
         return board
 
-    def generate_random(self):
+    def __generate_random(self):
         """Generate board with weighted letters (This was used for testing)"""
         letter_weights = {
             'E': 12, 'T': 9, 'A': 8, 'O': 8, 'I': 7, 'N': 7,
@@ -149,7 +148,7 @@ class BoardGenerator:
             board.append(board_row)
         return board
 
-    def meets_difficulty(self, word_count):
+    def __meets_difficulty(self, word_count):
         """Check if word count meets difficulty threshold"""
         if self.size == 4:
             if self.difficulty == 'Easy':

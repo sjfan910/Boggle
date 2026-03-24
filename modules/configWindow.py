@@ -3,12 +3,10 @@ from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QPushButton, QLa
 from PyQt5.QtCore import Qt
 from css.configWindowcss import *
 
-'''
+"""
 This file creates the configuration screen where the user customize Boggle game settings.
 It acts as the bridge between the main menu and the actual game, managing all game parameters.
-
-
-'''
+"""
 class ConfigWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -23,9 +21,9 @@ class ConfigWindow(QWidget):
         self.difficulty_options = ["Medium", "Hard", "Easy"]
         self.helper_options = ["On", "Off"]
 
-        self.initUI()
+        self.__initUI()
 
-    def initUI(self):
+    def __initUI(self):
         self.setWindowTitle('Boggle Configuration')
         self.setFixedSize(900, 700)
         self.setStyleSheet("background-color: white;")
@@ -39,26 +37,26 @@ class ConfigWindow(QWidget):
         gridsize_label = QLabel('Grid Size')
         gridsize_label.setAlignment(Qt.AlignCenter)
         gridsize_label.setStyleSheet(gridStyle)
-        self.gridsize_btn = self.create_toggle_button(self.gridsize_options[0])
-        self.gridsize_btn.clicked.connect(self.toggle_gridsize)
+        self.gridsize_btn = self.__create_toggle_button(self.gridsize_options[0])
+        self.gridsize_btn.clicked.connect(self.__toggle_gridsize)
 
         timer_label = QLabel('Timer')
         timer_label.setAlignment(Qt.AlignCenter)
-        timer_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #555;")
-        self.timer_btn = self.create_toggle_button(self.timer_options[0])
-        self.timer_btn.clicked.connect(self.toggle_timer)
+        timer_label.setStyleSheet(gridStyle)
+        self.timer_btn = self.__create_toggle_button(self.timer_options[0])
+        self.timer_btn.clicked.connect(self.__toggle_timer)
 
         difficulty_label = QLabel('Difficulty')
         difficulty_label.setAlignment(Qt.AlignCenter)
-        difficulty_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #555;")
-        self.difficulty_btn = self.create_toggle_button(self.difficulty_options[0])
-        self.difficulty_btn.clicked.connect(self.toggle_difficulty)
+        difficulty_label.setStyleSheet(gridStyle)
+        self.difficulty_btn = self.__create_toggle_button(self.difficulty_options[0])
+        self.difficulty_btn.clicked.connect(self.__toggle_difficulty)
 
         helper_label = QLabel('AI Helper')
         helper_label.setAlignment(Qt.AlignCenter)
-        helper_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #555;")
-        self.helper_btn = self.create_toggle_button(self.helper_options[0])
-        self.helper_btn.clicked.connect(self.toggle_helper)
+        helper_label.setStyleSheet(gridStyle)
+        self.helper_btn = self.__create_toggle_button(self.helper_options[0])
+        self.helper_btn.clicked.connect(self.__toggle_helper)
 
         grid_layout.addWidget(gridsize_label, 0, 0)
         grid_layout.addWidget(self.gridsize_btn, 1, 0)
@@ -116,7 +114,7 @@ class ConfigWindow(QWidget):
 
         self.setLayout(main_layout)
 
-    def create_toggle_button(self, text):
+    def __create_toggle_button(self, text):
         button = QPushButton(text)
         button.setFixedSize(150, 80)
         button.setStyleSheet("""
@@ -134,19 +132,19 @@ class ConfigWindow(QWidget):
         """)
         return button
 
-    def toggle_gridsize(self):
+    def __toggle_gridsize(self):
         self.gridsize_index = (self.gridsize_index + 1) % len(self.gridsize_options)
         self.gridsize_btn.setText(self.gridsize_options[self.gridsize_index])
 
-    def toggle_timer(self):
+    def __toggle_timer(self):
         self.timer_index = (self.timer_index + 1) % len(self.timer_options)
         self.timer_btn.setText(self.timer_options[self.timer_index])
 
-    def toggle_difficulty(self):
+    def __toggle_difficulty(self):
         self.difficulty_index = (self.difficulty_index + 1) % len(self.difficulty_options)
         self.difficulty_btn.setText(self.difficulty_options[self.difficulty_index])
 
-    def toggle_helper(self):
+    def __toggle_helper(self):
         self.helper_index = (self.helper_index + 1) % len(self.helper_options)
         self.helper_btn.setText(self.helper_options[self.helper_index])
 

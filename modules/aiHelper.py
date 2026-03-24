@@ -1,3 +1,4 @@
+import math
 import threading
 from wordfreq import word_frequency
 from modules.validation import shared_validator
@@ -57,7 +58,6 @@ class BeamSearchNode:
             return letter_freq.get(self.word[-1], 3.0)
         freq = word_frequency(self.word.lower(), 'en', wordlist='best')
         if freq > 0:
-            import math
             zipf_score = math.log10(freq * 1e8)
             return max(0, zipf_score)  # Ensure non-negative
         return 0.0
@@ -84,13 +84,13 @@ class AIHelper:
         """
         threshold = initial_threshold
         while threshold >= 0:
-            result = self._search_with_threshold(board, found_words, threshold)
+            result = self.__search_with_threshold(board, found_words, threshold)
             if result[0] is not None:
                 return result
             threshold -= 1.0
         return (None, None)
 
-    def _search_with_threshold(self, board, found_words, threshold):
+    def __search_with_threshold(self, board, found_words, threshold):
         """
         Search for words above given threshold using multi-threaded beam search
         Args:
@@ -111,7 +111,7 @@ class AIHelper:
             """Thread worker: beam search starting from a specific tile"""
             if found_result.is_set():
                 return
-            result = self._beam_search(board, start_row, start_col, found_words, threshold, found_result)
+            result = self.__beam_search(board, start_row, start_col, found_words, threshold, found_result)
             if result[0] is not None:
                 with results_lock:
                     results.append(result)
@@ -135,7 +135,7 @@ class AIHelper:
             return results[0]
         return (None, None)
 
-    def _beam_search(self, board, start_row, start_col, found_words, threshold, found_result):
+    def __beam_search(self, board, start_row, start_col, found_words, threshold, found_result):
         """
         Args:
             board (list): 2D list representing the board
@@ -161,7 +161,7 @@ class AIHelper:
         )
         beam = [initial_node]
         directions = [(-1, -1), (-1, 0), (-1, 1),
-                      (0, -1), (0, 1),
+                      (0, -1),           (0, 1),
                       (1, -1), (1, 0), (1, 1)]
 
         while beam and len(beam[0].word) <= self.max_word_length:
@@ -173,7 +173,6 @@ class AIHelper:
                         node.word.upper() not in found_words and
                         self.validator.is_valid_word(node.word)):
                     freq = word_frequency(node.word.lower(), 'en', wordlist='best')
-                    import math
                     if freq > 0:
                         zipf_score = math.log10(freq * 1e8)
                         if zipf_score >= threshold:

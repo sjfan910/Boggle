@@ -17,15 +17,34 @@ Key Features:
 """
 
 
+def format_timestamp(timestamp_str):
+    try:
+        dt = datetime.fromisoformat(timestamp_str)
+        day_name = dt.strftime('%A')
+        day = dt.day
+        month_name = dt.strftime('%B')
+        time = dt.strftime('%H:%M')
+
+        # Add ordinal suffix (st, nd, rd, th)
+        if 10 <= day % 100 <= 20:
+            suffix = 'th'
+        else:
+            suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
+
+        return f"{day_name} {day}{suffix} {month_name} {time}"
+    except:
+        return "Unknown date"
+
+
 class GameDetailWindow(QWidget):
 
     def __init__(self, game_data, history_window=None):
         super().__init__()
         self.game_data = game_data
         self.history_window = history_window
-        self.initUI()
+        self.__initUI()
 
-    def initUI(self):
+    def __initUI(self):
         self.setWindowTitle('Game Details')
         self.setFixedSize(900, 700)
         self.setStyleSheet("background-color: #f0f0f0;")
@@ -48,7 +67,7 @@ class GameDetailWindow(QWidget):
         """)
 
         timestamp_str = self.game_data.get('timestamp', '')
-        formatted_time = self.format_timestamp(timestamp_str)
+        formatted_time = self.__format_timestamp(timestamp_str)
 
         grid_size = self.game_data.get('grid_size', 4)
         difficulty = self.game_data.get('difficulty', 'Unknown')
@@ -110,13 +129,13 @@ class GameDetailWindow(QWidget):
         words_layout = QVBoxLayout()
         words_layout.setSpacing(20)
 
-        word_groups = self.group_words_by_length()
+        word_groups = self.__group_words_by_length()
 
         for length in sorted(word_groups.keys()):
             if length >= 7:
                 continue  # Handle 7+ separately
 
-            group_widget = self.create_word_group_widget(length, word_groups[length])
+            group_widget = self.__create_word_group_widget(length, word_groups[length])
             words_layout.addWidget(group_widget)
 
         if any(l >= 7 for l in word_groups.keys()):
@@ -126,7 +145,7 @@ class GameDetailWindow(QWidget):
                 long_words['missed'].extend(word_groups[length]['missed'])
 
             if long_words['found'] or long_words['missed']:
-                group_widget = self.create_word_group_widget('7+', long_words)
+                group_widget = self.__create_word_group_widget('7+', long_words)
                 words_layout.addWidget(group_widget)
 
         words_layout.addStretch()
@@ -137,25 +156,10 @@ class GameDetailWindow(QWidget):
         main_layout.addWidget(scroll)
         self.setLayout(main_layout)
 
-    def format_timestamp(self, timestamp_str):
-        try:
-            dt = datetime.fromisoformat(timestamp_str)
-            day_name = dt.strftime('%A')
-            day = dt.day
-            month_name = dt.strftime('%B')
-            time = dt.strftime('%H:%M')
+    def __format_timestamp(self, timestamp_str):
+        return format_timestamp(timestamp_str)
 
-            # Add ordinal suffix (st, nd, rd, th)
-            if 10 <= day % 100 <= 20:
-                suffix = 'th'
-            else:
-                suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
-
-            return f"{day_name} {day}{suffix} {month_name} {time}"
-        except:
-            return "Unknown date"
-
-    def group_words_by_length(self):
+    def __group_words_by_length(self):
         found_words = set(word.upper() for word in self.game_data.get('found_words', []))
         all_words = set(word.upper() for word in self.game_data.get('all_possible_words', []))
         missed_words = all_words - found_words
@@ -174,7 +178,7 @@ class GameDetailWindow(QWidget):
             word_groups[length]['missed'].sort()
         return word_groups
 
-    def create_word_group_widget(self, length, words_dict):
+    def __create_word_group_widget(self, length, words_dict):
         container = QWidget()
         layout = QVBoxLayout()
         layout.setSpacing(10)

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QPushButton, QLabel, QVBoxLa
 from PyQt5.QtCore import Qt
 from css.homepagecss import style
 
-'''
+"""
 This file serves as the application's main menu and navigation hub.
 It provides the first interface users see and handles transitions to other components.
 
@@ -35,7 +35,7 @@ Key Methods:
         - Transition from Menu to History Results
  - quit_game(self):
         - Quits the software
-'''
+"""
 
 class MainMenu(QWidget):
     def __init__(self):

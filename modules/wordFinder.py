@@ -1,6 +1,6 @@
 from modules.validation import shared_validator
 
-'''
+"""
 This file discovers all valid words hidden in a Boggle board.
 We use DFS with prefix pruning to ensure optimisation.
 
@@ -58,25 +58,25 @@ FUNCTION dfs(board, row, col, current_word, visited, found_words):
     IF length(current_word) >= 3 AND is_valid_word(current_word):
         found_words.add(current_word)
         
-    FOR i in direction [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), 
-'''
+    FOR i in direction [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1),
+"""
 class WordFinder:
     def __init__(self):
         self.validator = shared_validator
 
     def find_all_words(self, board): 
         # This is the public function
-        found_words = set() # Prevent word duplication
+        found_words = set() # Different pathways same words don't duplicate
         rows = len(board)
         cols = len(board[0])
         for row in range(rows): 
             for col in range(cols): 
                 visited = [[False] * cols for _ in range(rows)]
-                self.dfs(board, row, col, "", visited, found_words)
+                self.__dfs(board, row, col, "", visited, found_words)
 
         return sorted(list(found_words))
 
-    def dfs(self, board, row, col, current_word, visited, found_words) -> None: 
+    def __dfs(self, board, row, col, current_word, visited, found_words) -> None: 
         # Private Function: purpose is to populate found_words = {all words in board}
         if row < 0 or row >= len(board) or col < 0 or col >= len(board[0]): # Base case
             return
@@ -98,6 +98,6 @@ class WordFinder:
                       # Dig in all 8 directions   
 
         for dr, dc in directions:
-            self.dfs(board, row + dr, col + dc, current_word, visited, found_words)
+            self.__dfs(board, row + dr, col + dc, current_word, visited, found_words)
 
         visited[row][col] = False
