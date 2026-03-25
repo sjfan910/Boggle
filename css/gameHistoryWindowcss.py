@@ -22,23 +22,30 @@ completionBadgeStyle = """
 """
 
 timestampLabelStyle = """
-    font-size: 14px;
-    color: #666;
+    QLabel {
+        background-color: transparent;
+        font-size: 14px;
+        color: #666;
+    }
 """
 
 settingsLabelStyle = """
-    font-size: 16px;
-    font-weight: bold;
-    color: #333;
+    QLabel {
+        background-color: transparent;
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+    }
 """
 
 deleteButtonStyle = """
     QPushButton {
         background-color: #f44336;
         color: white;
-        font-size: 20px;
-        border-radius: 20px;
+        font-size: 14px;
+        border-radius: 10px;
         border: 2px solid #d32f2f;
+        text-align: center;
     }
     QPushButton:hover {
         background-color: #d32f2f;

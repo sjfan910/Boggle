@@ -1,10 +1,10 @@
-import sys
 import json
 import sqlite3
 from datetime import datetime
-from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QVBoxLayout, QDialog, QHBoxLayout, QPushButton, QScrollArea, QMessageBox)
+from PyQt5.QtWidgets import (QWidget, QLabel, QVBoxLayout, QDialog, QHBoxLayout, QPushButton, QScrollArea)
 from PyQt5.QtCore import Qt, QTimer
 from css.analyticsWindowcss import *
+from modules.mergeSort import MergeSort
 
 
 class DeleteGameDialog(QDialog):
@@ -55,37 +55,6 @@ class AnalyticsWindow(QWidget):
 
         self.__initUI()
 
-    def merge_sort(self, missed_words): 
-        # Recursive In Place Merge Sort of Time complexity O(nlog(n))
-        n = len(missed_words) 
-        if n > 1:
-            m = n // 2 # divide the list in two sub lists
-            l1 = missed_words[:m]
-            l2 = missed_words[m:]
-
-            self.merge_sort(l1)
-            self.merge_sort(l2)
-
-            i = j = k = 0
-
-            while i < len(l1) and j < len(l2):
-                if l1[i] <= l2[j]:
-                    missed_words[k] = l1[i]
-                    i += 1
-                else:
-                    missed_words[k] = l2[j]
-                    j += 1
-                k = k + 1
-
-            while i < len(l1):
-                missed_words[k] = l1[i]
-                i += 1
-                k += 1    
-            while j < len(l2):
-                missed_words[k] = l2[j]
-                j += 1
-                k += 1
-
 
     def __initUI(self):
         self.setWindowTitle('Game Analytics')
@@ -131,8 +100,8 @@ class AnalyticsWindow(QWidget):
         missed_label.setStyleSheet(missedLabelStyle)
 
         if self.missed_words:
-            self.merge_sort(self.missed_words)
-            missed_text = ', '.join(self.missed_words)
+            MergeSort.sort(self.missed_words)
+            missed_text = ', '.join(word.capitalize() for word in self.missed_words)
         else:
             missed_text = ''
         missed_display = QLabel(missed_text)
@@ -172,23 +141,24 @@ class AnalyticsWindow(QWidget):
         main_layout.setContentsMargins(30, 30, 30, 30)
         self.setLayout(main_layout)
 
+    def __hide_message(self):
+        # Called after the message banner has been shown for 1 second
+        self.message_label.hide()
+        self.setEnabled(True)
+
     def __show_success_message(self, text):
         self.setEnabled(False)
         self.message_label.setText(text)
         self.message_label.setStyleSheet(successMessageStyle)
         self.message_label.show()
-        QTimer.singleShot(1000, lambda: (self.message_label.hide(), self.setEnabled(True)))
+        QTimer.singleShot(1000, self.__hide_message)
 
     def __show_error_message(self, text):
         self.setEnabled(False)
         self.message_label.setText(text)
         self.message_label.setStyleSheet(errorMessageStyle)
         self.message_label.show()
-        QTimer.singleShot(1000, lambda: (self.message_label.hide(), self.setEnabled(True)))
-
-    def __hide_message(self):
-        self.message_label.hide()
-        self.setEnabled(True)
+        QTimer.singleShot(1000, self.__hide_message)
 
     def save_game(self):
         try:
@@ -208,7 +178,7 @@ class AnalyticsWindow(QWidget):
             try:
                 with open('data/game_history.json', 'r') as f:
                     games = json.load(f)
-            except:
+            except Exception:
                 games = []
 
             games.append(self.game_data)

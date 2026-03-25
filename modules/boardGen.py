@@ -1,5 +1,6 @@
 import random
 from modules.wordFinder import WordFinder
+from modules.validation import PreProcessing
 
 """
 This file generates a Boggle board using real dice configurations. 
@@ -45,16 +46,9 @@ Key Methods:
         - We must have fallback logic in case Main method fails
         
  - meets_difficulty(self, word_count):
-        - Determines if a board has appropriate number of words for chosen difficulty
-        - We implement Difficulty Thresholds:
-            4x4 Boards:
-            - Easy: 80+ words 
-            - Medium: 50-79 words
-            - Hard: <50 words
-            5x5 Boards:
-            - Easy: 150+ words
-            - Medium: 100-149 words
-            - Hard: <100 words
+        - Ensures the board is playable regardless of difficulty
+        - Difficulty affects word frequency (via PreProcessing/WordValidator), not word count
+        - Minimum threshold: 50 words on any board size
             
  Algorithm Flow: 
     - generate() called
@@ -88,9 +82,10 @@ class BoardGenerator:
         self.size = size
         self.difficulty = difficulty
         self.word_finder = WordFinder()
+        self.band_validator = PreProcessing(difficulty)
 
     def generate(self):
-        max_attempts = 50
+        max_attempts = 100
 
         for attempt in range(max_attempts):
             if self.size == 4:
@@ -101,9 +96,10 @@ class BoardGenerator:
             else: # Generate from random function (This was used for testing)
                 board = self.__generate_random()
 
-            word_count = len(self.word_finder.find_all_words(board))
-            if self.__meets_difficulty(word_count):
-                print(f"Board generated with {word_count} words (Difficulty: {self.difficulty})")
+            all_words = self.word_finder.find_all_words(board)
+            band_count = sum(1 for w in all_words if self.band_validator.is_valid_word(w))
+            if self.__meets_difficulty(band_count):
+                print(f"Board generated in {attempt} attempts with {band_count} difficulty-band words (Difficulty: {self.difficulty})")
                 return board
 
         print(f"Warning: Could not generate board meeting {self.difficulty} difficulty")
@@ -149,20 +145,5 @@ class BoardGenerator:
         return board
 
     def __meets_difficulty(self, word_count):
-        """Check if word count meets difficulty threshold"""
-        if self.size == 4:
-            if self.difficulty == 'Easy':
-                return word_count >= 80
-            elif self.difficulty == 'Medium':
-                return 50 <= word_count < 80
-            elif self.difficulty == 'Hard':
-                return word_count < 50
-        elif self.size == 5:
-            # Adjust for 5x5 grid
-            if self.difficulty == 'Easy':
-                return word_count >= 150
-            elif self.difficulty == 'Medium':
-                return 100 <= word_count < 150
-            elif self.difficulty == 'Hard':
-                return word_count < 100
-        return True
+        """Check board has enough words to be playable (min 50, regardless of difficulty)"""
+        return word_count >= 50

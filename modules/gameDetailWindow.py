@@ -1,9 +1,8 @@
-import sys
 from datetime import datetime
-from PyQt5.QtWidgets import (QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout,
-                             QPushButton, QScrollArea, QFrame)
+from PyQt5.QtWidgets import (QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QFrame)
 from PyQt5.QtCore import Qt
 from css.gameDetailWindowcss import *
+from modules.mergeSort import MergeSort
 
 """
 GameDetailWindow displays detailed breakdown of a single game.
@@ -27,10 +26,17 @@ def format_timestamp(timestamp_str):
         time = dt.strftime('%H:%M')
 
         # Add ordinal suffix (st, nd, rd, th)
+        # Days 11-20 always use 'th' (11th, 12th, 13th...)
         if 10 <= day % 100 <= 20:
             suffix = 'th'
+        elif day % 10 == 1:
+            suffix = 'st'
+        elif day % 10 == 2:
+            suffix = 'nd'
+        elif day % 10 == 3:
+            suffix = 'rd'
         else:
-            suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
+            suffix = 'th'
 
         return f"{day_name} {day}{suffix} {month_name} {time}"
     except:
@@ -64,7 +70,7 @@ class GameDetailWindow(QWidget):
         completion_label.setStyleSheet(completionLabelStyle)
 
         timestamp_str = self.game_data.get('timestamp', '')
-        formatted_time = self.__format_timestamp(timestamp_str)
+        formatted_time = format_timestamp(timestamp_str)
 
         grid_size = self.game_data.get('grid_size', 4)
         difficulty = self.game_data.get('difficulty', 'Unknown')
@@ -108,22 +114,25 @@ class GameDetailWindow(QWidget):
 
         word_groups = self.__group_words_by_length()
 
-        for length in sorted(word_groups.keys()):
+        lengths = list(word_groups.keys())
+        MergeSort.sort(lengths)
+        for length in lengths:
             if length >= 7:
                 continue  # Handle 7+ separately
 
             group_widget = self.__create_word_group_widget(length, word_groups[length])
             words_layout.addWidget(group_widget)
 
-        if any(l >= 7 for l in word_groups.keys()):
-            long_words = {'found': [], 'missed': []}
-            for length in [l for l in word_groups.keys() if l >= 7]:
+        # Collect all words of length 7 or more into a single '7+' group
+        long_words = {'found': [], 'missed': []}
+        for length in word_groups.keys():
+            if length >= 7:
                 long_words['found'].extend(word_groups[length]['found'])
                 long_words['missed'].extend(word_groups[length]['missed'])
 
-            if long_words['found'] or long_words['missed']:
-                group_widget = self.__create_word_group_widget('7+', long_words)
-                words_layout.addWidget(group_widget)
+        if long_words['found'] or long_words['missed']:
+            group_widget = self.__create_word_group_widget('7+', long_words)
+            words_layout.addWidget(group_widget)
 
         words_layout.addStretch()
         scroll_content.setLayout(words_layout)
@@ -133,8 +142,6 @@ class GameDetailWindow(QWidget):
         main_layout.addWidget(scroll)
         self.setLayout(main_layout)
 
-    def __format_timestamp(self, timestamp_str):
-        return format_timestamp(timestamp_str)
 
     def __group_words_by_length(self):
         found_words = set(word.upper() for word in self.game_data.get('found_words', []))
@@ -151,8 +158,8 @@ class GameDetailWindow(QWidget):
             else:
                 word_groups[length]['missed'].append(word)
         for length in word_groups:
-            word_groups[length]['found'].sort()
-            word_groups[length]['missed'].sort()
+            MergeSort.sort(word_groups[length]['found'])
+            MergeSort.sort(word_groups[length]['missed'])
         return word_groups
 
     def __create_word_group_widget(self, length, words_dict):
@@ -165,7 +172,7 @@ class GameDetailWindow(QWidget):
         total_count = found_count + len(words_dict['missed'])
         completion = (found_count / total_count * 100) if total_count > 0 else 0
 
-        length_str = f"{length}" if isinstance(length, int) else length
+        length_str = str(length)
         header = QLabel(f'{length_str} Letter Words <span style="color: #4CAF50;">{completion:.1f}%</span>')
         header.setStyleSheet(groupHeaderStyle)
         layout.addWidget(header)
@@ -178,12 +185,12 @@ class GameDetailWindow(QWidget):
         all_words = []
 
         for word in words_dict['found']:
-            word_label = QLabel(word.lower())
+            word_label = QLabel(word.capitalize())
             word_label.setStyleSheet(foundWordStyle)
             all_words.append(word_label)
 
         for word in words_dict['missed']:
-            word_label = QLabel(word.lower())
+            word_label = QLabel(word.capitalize())
             word_label.setStyleSheet(missedWordStyle)
             all_words.append(word_label)
         row_layout = QHBoxLayout()

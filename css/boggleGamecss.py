@@ -116,6 +116,12 @@ wordStyle = """
             min-height: 60px;
         """
 
+wordsLabelStyle = """
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        """
+
 foundwordsStyle = """
             background-color: white;
             border: 2px solid #ddd;

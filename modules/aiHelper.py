@@ -1,6 +1,5 @@
-import math
 import threading
-from wordfreq import word_frequency
+from wordfreq import zipf_frequency
 from modules.validation import shared_validator
 
 """
@@ -56,11 +55,8 @@ class BeamSearchNode:
                 'S': 6.5, 'H': 6.5, 'R': 6, 'D': 5.5, 'L': 5.5, 'U': 5
             }
             return letter_freq.get(self.word[-1], 3.0)
-        freq = word_frequency(self.word.lower(), 'en', wordlist='best')
-        if freq > 0:
-            zipf_score = math.log10(freq * 1e8)
-            return max(0, zipf_score)  # Ensure non-negative
-        return 0.0
+        zipf_score = zipf_frequency(self.word.lower(), 'en')
+        return zipf_score
 
 
 class AIHelper:
@@ -131,7 +127,7 @@ class AIHelper:
             thread.join()
 
         if results:
-            results.sort(key=lambda x: word_frequency(x[0].lower(), 'en', wordlist='best'), reverse=True)
+            results.sort(key=lambda x: zipf_frequency(x[0].lower(), 'en'), reverse=True)
             return results[0]
         return (None, None)
 
@@ -172,11 +168,9 @@ class AIHelper:
                 if (len(node.word) >= 3 and
                         node.word.upper() not in found_words and
                         self.validator.is_valid_word(node.word)):
-                    freq = word_frequency(node.word.lower(), 'en', wordlist='best')
-                    if freq > 0:
-                        zipf_score = math.log10(freq * 1e8)
-                        if zipf_score >= threshold:
-                            return (node.word.upper(), node.path)
+                    zipf_score = zipf_frequency(node.word.lower(), 'en')
+                    if zipf_score >= threshold:
+                        return (node.word.upper(), node.path)
 
             candidates = []
             for node in beam:

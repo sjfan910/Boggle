@@ -1,8 +1,9 @@
 import os
+from wordfreq import zipf_frequency
 
 """
-This file validates the current word with a dictionary
-Uses a prefix tree (Trie) data structure
+This file validates the current word against a difficulty-filtered dictionary
+Uses a prefix tree (Trie) data structure built dynamically at runtime
 Enables real-time word validation during gameplay
 
 _TrieNode Class:
@@ -39,25 +40,55 @@ Key Methods:
         - Return False if prefix path does not exist
         - Return True if path exists
 
-WordValidator Class:
+PreProcessing Class:
 Key Attributes:
- - self.trie - _Trie instance containing entire dictionary
+ - self.trie - _Trie instance built from difficulty-filtered word list
+
+Constants:
+ - DIFFICULTY_THRESHOLDS - Maps difficulty string to minimum Zipf frequency score
+        - Easy:   > 5.00 (very common everyday words)
+        - Medium: > 4.00 (moderately common words)
+        - Hard:   > 3.10 (includes rarer but valid Boggle words)
+        - Zipf scale runs 0-8; most known English words fall between 3 and 7
 
 Key Methods:
- - __init__(self, dictionary_path='data/enable1.txt'):
-        - Constructor that builds complete dictionary _Trie
-        - Attempts to load dictionary file
-        - Fall back to basic word list if file is unavailable
- - __load_dictionary(self, path)
-        - Reads dictionary file and populates the _Trie
-        - Checks if dictionary exists
-        - Strip whitespaces, converts to uppercase
-        - Only include words ≥ 3 letters (According to Boggle rules)
-        - Displays word count loaded
+ - __init__(self, difficulty, dictionary_path, profanity_path):
+        - Looks up Zipf frequency threshold for given difficulty
+        - Loads banned words from profanity list into a set for O(1) lookup
+        - Iterates over the source dictionary file
+        - Filters out words shorter than 4 or longer than 15 characters
+        - Filters out any word found in the profanity set
+        - Calls zipf_frequency() on each remaining word
+        - Inserts word into _Trie only if its frequency exceeds the threshold
+        - Produces a _Trie whose contents are entirely determined by difficulty
+ - is_valid_word(self, word):
+        - Public interface checking if word exists in filtered dictionary
+ - is_valid_prefix(self, prefix):
+        - Public interface checking if prefix exists in filtered dictionary
+
+WordValidator Class:
+Key Attributes:
+ - self.trie - Reference to the _Trie built by PreProcessing
+
+Key Methods:
+ - __init__(self, difficulty='Hard'):
+        - Delegates Trie construction entirely to PreProcessing
+        - Holds a reference to the resulting trie for use by DFS and other algorithms
+ - set_difficulty(self, difficulty):
+        - Rebuilds the Trie via a new PreProcessing instance for the given difficulty
+        - Replaces self.trie so all consumers immediately use the new word set
  - is_valid_word(self, word):
         - Public interface checking if word exists in dictionary
  - is_valid_prefix(self, prefix):
         - Public interface checking if prefix exists in dictionary
+
+Algorithm Flow:
+    - set_difficulty() called with player's chosen difficulty
+    - PreProcessing.__init__() loads profanity list and opens dictionary
+    - Each word checked against length bounds, profanity set, and Zipf threshold
+    - Qualifying words inserted into _Trie
+    - WordValidator.trie updated to point at the new _Trie
+    - DFS and other algorithms query shared_validator for word/prefix lookups
 """
 
 class _TrieNode:
@@ -93,92 +124,34 @@ class _Trie:
             node = node.children[char]
         return True
 
-# class PreProcessing:
-#     """
-#     Generates difficulty-filtered word list files from enable1.txt.
-#     Run this once offline to produce easy.txt, medium.txt, hard.txt.
-#     WordValidator then loads the appropriate file based on difficulty.
-#
-#     Difficulty thresholds (Zipf frequency scale, 0-8):
-#      - Easy:   > 5.00  (very common words, e.g. "STONE", "PLACE")
-#      - Medium: > 4.00  (moderately common words)
-#      - Hard:   > 3.10  (includes rarer valid Boggle words)
-#
-#     Words are also filtered against a profanity wordlist and capped at
-#     15 characters (Boggle boards produce no longer paths in practice).
-#     """
-#
-#     DIFFICULTY_THRESHOLDS = {
-#         'Easy':   5.00,
-#         'Medium': 4.00,
-#         'Hard':   3.10,
-#     }
-#
-#     FILE_PATHS = {
-#         'Easy':   'data/easy.txt',
-#         'Medium': 'data/medium.txt',
-#         'Hard':   'data/hard.txt',
-#     }
-#
-#     def __init__(self, source_path='data/enable1.txt', profanity_path='data/profanity_wordlist.txt'):
-#         self.source_path = source_path
-#         self.banned = self.__load_banned(profanity_path)
-#
-#     def __load_banned(self, profanity_path):
-#         banned = set()
-#         if os.path.exists(profanity_path):
-#             with open(profanity_path, 'r') as f:
-#                 for line in f:
-#                     banned.add(line.strip().upper())
-#         return banned
-#
-#     def generate_all(self):
-#         """Build and write easy.txt, medium.txt, hard.txt from enable1.txt."""
-#         word_lists = {difficulty: [] for difficulty in self.DIFFICULTY_THRESHOLDS}
-#
-#         with open(self.source_path, 'r') as f:
-#             for line in f:
-#                 word = line.strip()
-#                 if not (3 < len(word) < 16) or word.upper() in self.banned:
-#                     continue
-#                 frequency = zipf_frequency(word, 'en')
-#                 for difficulty, threshold in self.DIFFICULTY_THRESHOLDS.items():
-#                     if frequency > threshold:
-#                         word_lists[difficulty].append(word)
-#
-#         for difficulty, words in word_lists.items():
-#             with open(self.FILE_PATHS[difficulty], 'w') as f:
-#                 for word in words:
-#                     f.write(word + '\n')
-#             print(f"Written {len(words)} words to {self.FILE_PATHS[difficulty]}")
-#
-#     @staticmethod
-#     def get_path_for_difficulty(difficulty):
-#         """Return the pre-built word list path for a given difficulty string."""
-#         return PreProcessing.FILE_PATHS.get(difficulty, 'data/enable1.txt')
+class PreProcessing:
+    DIFFICULTY_THRESHOLDS = {
+        'Easy':   (4.00, 8.00),
+        'Medium': (3.50, 5.50),
+        'Hard':   (3.00, 4.50),
+    }
 
-class WordValidator:
-    def __init__(self, dictionary_path='/Users/sjf/Documents/My NEA/Boggle/data/enable1.txt'):
+    def __init__(self, difficulty, dictionary_path='data/enable1.txt', profanity_path='data/profanity_wordlist.txt'):
         self.trie = _Trie()
-        self.__load_dictionary(dictionary_path)
+        low, high = self.DIFFICULTY_THRESHOLDS[difficulty]
 
-    def __load_dictionary(self, path) -> bool:
-        if not os.path.exists(path):
-            print(f"Dictionary not found at {path}.")
-            return False
-        try:
-            with open(path, 'r') as f:
-                word_count = 0
+        banned = set()
+        if os.path.exists(profanity_path):
+            with open(profanity_path, 'r') as f:
                 for line in f:
-                    word = line.strip().upper()
-                    if len(word) >= 3:
-                        self.trie.insert(word) # Builds the dictionary trie
-                        word_count += 1
-                print(f"Loaded {word_count} words from dictionary")
-        except Exception as e:
-            print(f"Error loading dictionary: {e}")
-            return False
-        return True
+                    banned.add(line.strip().lower())
+
+        word_count = 0
+        with open(dictionary_path, 'r') as f:
+            for line in f:
+                word = line.strip()
+                if len(word) < 3 or len(word) > 16 or word.lower() in banned:
+                    continue
+                frequency = zipf_frequency(word, 'en')
+                if low < frequency <= high:
+                    self.trie.insert(word)
+                    word_count += 1
+        print(f"[DEBUG] Built trie using word list of {word_count} words | Difficulty: {difficulty} (Zipf {low} - {high})")
 
     def is_valid_word(self, word):
         return self.trie.search(word)
@@ -186,5 +159,35 @@ class WordValidator:
     def is_valid_prefix(self, prefix):
         return self.trie.starts_with(prefix)
 
-# Shared singleton — dictionary loaded once and reused by all modules
+
+class WordValidator:
+    def __init__(self, dictionary_path='data/enable1.txt'):
+        self.trie = _Trie()
+        self.__load_dictionary(dictionary_path)
+
+    def __load_dictionary(self, path, profanity_path='data/profanity_wordlist.txt'):
+        if not os.path.exists(path):
+            print(f"Dictionary not found at {path}.")
+            return
+        banned = set()
+        if os.path.exists(profanity_path):
+            with open(profanity_path, 'r') as f:
+                for line in f:
+                    banned.add(line.strip().lower())
+        word_count = 0
+        with open(path, 'r') as f:
+            for line in f:
+                word = line.strip()
+                if len(word) >= 3 and word.lower() not in banned and zipf_frequency(word, 'en') > 3.10:
+                    self.trie.insert(word)
+                    word_count += 1
+        print(f"[DEBUG] WordValidator loaded {word_count} words (Zipf > 3.10, profanity filtered)")
+
+    def is_valid_word(self, word):
+        return self.trie.search(word)
+
+    def is_valid_prefix(self, prefix):
+        return self.trie.starts_with(prefix)
+
+# Shared singleton — accepts any valid English word regardless of difficulty
 shared_validator = WordValidator()
